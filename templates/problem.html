@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ problem.title }}{% endblock %}
+{% block page %}problem{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('problems') }}">← All problems</a></p>
+<h1>{{ problem.title }}</h1>
+<p class="muted">Time limit {{ problem.time_limit_sec }} s · Memory {{ problem.mem_limit_mb }} MB</p>
+
+<section class="card status-box">
+  {% if pr.solved %}
+    <span class="verdict ok">✓ Solved</span> at {{ pr.solved_min }} min after start{% if pr.wrong %} ({{ pr.wrong }} wrong before){% endif %}.
+  {% else %}
+    <span>Your attempts: <b>{{ pr.attempts }}</b>{% if limit %} of {{ limit }}{% endif %}</span>
+    {% if pr.wrong %}<span class="verdict bad">✗ {{ pr.wrong }} wrong</span>{% endif %}
+    {% if pr.pending %}<span class="verdict wait">… judging</span>{% endif %}
+    {% if not pr.attempts and not pr.pending %}<span class="muted">Not tried yet</span>{% endif %}
+  {% endif %}
+  {% if closed %}<div class="muted">{{ closed }}</div>{% endif %}
+</section>
+
+<section class="card statement">{{ problem.statement }}</section>
+
+{% for s in samples %}
+<div class="sample-grid">
+  <div><h3>Sample input</h3><pre>{{ s.input }}</pre></div>
+  <div><h3>Sample output</h3><pre>{{ s.output }}</pre></div>
+</div>
+{% endfor %}
+
+{% if can_submit %}
+<section class="card">
+  <h2>Submit a solution</h2>
+  <form method="post" action="{{ url_for('submit', pid=problem.id) }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <div class="row">
+      <label>Language
+        <select name="language">
+          {% for key, label in languages.items() %}<option value="{{ key }}">{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+    </div>
+    <label>Code
+      <textarea name="code" class="code" rows="24" spellcheck="false" required></textarea>
+    </label>
+    <button id="submit-btn" class="primary">Submit</button>
+  </form>
+</section>
+{% else %}
+<div class="flash info">Submissions are closed for this problem.</div>
+{% endif %}
+{% endblock %}

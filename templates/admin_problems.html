@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Problems{% endblock %}
+{% block page %}admin-problems{% endblock %}
+{% block content %}
+<h1>Problems</h1>
+
+<section class="card">
+  <h2>Import from JSON</h2>
+  <p class="muted">
+    Upload a file, or paste the JSON below. New problems are added after the existing ones.
+    Nothing is saved if any part of the file is invalid.
+  </p>
+  <form method="post" action="{{ url_for('admin_import_problems') }}" enctype="multipart/form-data"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <input type="file" name="file" accept=".json,application/json">
+    <textarea name="json_text" rows="8" class="code" placeholder='{"problems": [{"title": "A + B", "statement": "...", "tests": [{"input": "3 4\n", "output": "7\n", "sample": true}]}]}'></textarea>
+    <button class="primary">Import</button>
+  </form>
+  <details class="format">
+    <summary>Expected format</summary>
+<pre>{
+  "problems": [
+    {
+      "title": "A + B",
+      "statement": "Read two integers and print their sum.",
+      "time_limit_sec": 2,
+      "mem_limit_mb": 256,
+      "tests": [
+        {"input": "3 4\n", "output": "7\n", "sample": true},
+        {"input": "10 20\n", "output": "30\n"}
+      ]
+    }
+  ]
+}</pre>
+    <p class="muted">time_limit_sec and mem_limit_mb are optional (defaults 2 s and 256 MB). "sample": true shows that test on the problem page; all tests are used for judging.</p>
+  </details>
+</section>
+
+<section class="card">
+  <h2>Current problems ({{ problems|length }})</h2>
+  <table class="table">
+    <thead><tr><th>#</th><th>Title</th><th>Limits</th><th>Tests</th><th>Samples shown</th><th></th></tr></thead>
+    <tbody>
+    {% for p in problems %}
+      <tr>
+        <td>{{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[(p.position - 1) % 26] }}</td>
+        <td>{{ p.title }}</td>
+        <td>{{ p.time_limit_sec }} s · {{ p.mem_limit_mb }} MB</td>
+        <td>{{ p.tests }}</td>
+        <td>{{ p.samples }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin_delete_problem', pid=p.id) }}"
+                data-confirm="Delete this problem and its tests?"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+            <button class="danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="muted">No problems yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

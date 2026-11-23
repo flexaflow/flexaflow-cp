@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block page %}login{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Log in</h1>
+  {% if reason == 'elsewhere' %}
+    <div class="flash error">You were logged out because this account signed in on another computer.</div>
+  {% elif reason == 'ip_changed' %}
+    <div class="flash error">Your network address changed, so this session was closed for security. Log in again.</div>
+  {% elif reason == 'contest_closed' %}
+    <div class="flash error">This contest is no longer active. You have been logged out.</div>
+  {% elif reason == 'idle' %}
+    <div class="flash error">You were logged out after a period of inactivity. Log in again.</div>
+  {% endif %}
+  {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+  <form method="post"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <label>Username <input name="username" autocomplete="username" required autofocus></label>
+    <label>Password <input name="password" type="password" autocomplete="current-password" required></label>
+    <button class="primary wide">Log in</button>
+  </form>
+  <p class="muted">Accounts are created by the contest admin. Ask them if you do not have one.</p>
+</section>
+{% endblock %}

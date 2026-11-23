@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page %}admin{% endblock %}
+{% block content %}
+{% if info.id is none %}
+  <section class="card center">
+    <h2>No active contest</h2>
+    <p class="muted">Start a new contest to import problems and add participants.</p>
+    <a class="btn" href="{{ url_for('admin_contests') }}">Go to Contests</a>
+  </section>
+{% else %}
+<h1>{{ info.title }} <span class="pill">{{ info.status }}</span></h1>
+
+<section class="card">
+  <h2>Schedule and rules</h2>
+  <form method="post" action="{{ url_for('admin_save_contest') }}" class="grid3"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <label>Contest title <input name="title" value="{{ info.title }}" required></label>
+    <label>Start <input name="start" type="datetime-local" value="{{ start_input }}" required></label>
+    <label>End <input name="end" type="datetime-local" value="{{ end_input }}" required></label>
+    <label>Max attempts per problem <input name="max_attempts" type="number" min="0" max="1000" value="{{ info.max_attempts }}"></label>
+    <div class="span3">
+      <button class="primary">Save</button>
+      <span class="muted">Times use this server's local time. Max attempts: 0 = unlimited.</span>
+    </div>
+  </form>
+</section>
+
+<section class="stats">
+  <div class="card stat"><b>{{ counts.users }}</b><span>participants</span></div>
+  <div class="card stat"><b>{{ counts.problems }}</b><span>problems</span></div>
+  <div class="card stat"><b>{{ counts.submissions }}</b><span>submissions</span></div>
+</section>
+
+<section class="card">
+  <h2>Latest submissions</h2>
+  <table class="table">
+    <thead><tr><th>#</th><th>User</th><th>Problem</th><th>Lang</th><th>Verdict</th><th>Time (UTC)</th></tr></thead>
+    <tbody>
+    {% for s in recent %}
+      <tr>
+        <td><a href="{{ url_for('admin_submission', sid=s.id) }}">{{ s.id }}</a></td>
+        <td>{{ s.username }}</td>
+        <td>{{ s.title }}</td>
+        <td>{{ s.language }}</td>
+        <td>{{ s.verdict }}</td>
+        <td>{{ s.submitted_at[11:19] }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="muted">No submissions yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endblock %}

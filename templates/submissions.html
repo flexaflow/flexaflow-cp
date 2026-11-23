@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}My submissions{% endblock %}
+{% block page %}submissions{% endblock %}
+{% block head %}{% if has_pending %}<meta http-equiv="refresh" content="4">{% endif %}{% endblock %}
+{% block content %}
+<h1>My submissions</h1>
+<p class="muted">Verdicts appear here as soon as judging finishes.</p>
+<table class="table">
+  <thead><tr><th>#</th><th>Problem</th><th>Language</th><th>Verdict</th><th>Tests</th><th>Max time</th><th>Submitted</th></tr></thead>
+  <tbody>
+  {% for s in submissions %}
+    <tr data-sub="{{ s.id }}">
+      <td>{{ s.id }}</td>
+      <td>{{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[(s.position - 1) % 26] }}. {{ s.title }}</td>
+      <td>{{ languages.get(s.language, s.language) }}</td>
+      <td class="verdict {{ 'ok' if s.verdict == 'Accepted' else ('wait' if s.verdict == 'Pending' else 'bad') }}">
+        {{ s.verdict }}
+        {% if s.compile_output %}
+          <details><summary>details</summary><pre>{{ s.compile_output }}</pre></details>
+        {% endif %}
+      </td>
+      <td>{{ s.passed }}/{{ s.total }}</td>
+      <td>{{ '%.0f'|format(s.max_time_ms) }} ms</td>
+      <td>{{ s.submitted_at[11:16] }} UTC</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="7" class="muted">No submissions yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

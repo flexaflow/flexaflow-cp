@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Problems{% endblock %}
+{% block page %}problems{% endblock %}
+{% block reload %}1{% endblock %}
+{% block content %}
+<h1>{{ info.title }}</h1>
+
+{% macro status_cell(pr) -%}
+  {%- if not pr or (not pr.attempts and not pr.pending) -%}
+    <span class="muted">Not tried</span>
+  {%- elif pr.solved -%}
+    <span class="verdict ok">✓ Solved</span>
+    <span class="muted">at {{ pr.solved_min }} min{% if pr.wrong %}, {{ pr.wrong }} wrong{% endif %}</span>
+  {%- else -%}
+    {% if pr.wrong %}<span class="verdict bad">✗ {{ pr.wrong }} wrong</span>{% endif %}
+    {% if pr.pending %}<span class="verdict wait">… judging</span>{% endif %}
+    {% if limit %}<span class="muted">{{ [limit - pr.attempts, 0]|max }} attempts left</span>{% endif %}
+  {%- endif %}
+{%- endmacro %}
+
+{% if info.status == 'not_configured' %}
+  <section class="card center">
+    <h2>The contest has not been scheduled yet.</h2>
+    <p class="muted">Keep this page open. It will update automatically.</p>
+  </section>
+
+{% elif info.status == 'before' %}
+  <section class="card center">
+    <h2>Contest starts in</h2>
+    <div id="countdown" class="big-timer">--:--:--</div>
+    <p class="muted">Starts {{ info.start.astimezone().strftime('%a %d %b %Y, %H:%M') }} (your server time)</p>
+    <p class="muted">The problems will appear here when the contest starts.</p>
+  </section>
+
+{% else %}
+  <section class="card center">
+    {% if info.status == 'running' %}
+      <h2>Contest is running</h2>
+      <div id="countdown" class="big-timer">--:--:--</div>
+      <p class="muted">Time remaining</p>
+    {% else %}
+      <h2>Contest has ended</h2>
+      <p class="muted">Problems are still readable, but submissions are closed.</p>
+    {% endif %}
+  </section>
+
+  <table class="table">
+    <thead><tr><th>#</th><th>Problem</th><th>Your status</th><th>Limits</th><th></th></tr></thead>
+    <tbody>
+    {% for p in problems %}
+      {% set pr = progress.get(p.id) %}
+      <tr class="{{ 'row-solved' if pr and pr.solved else '' }}">
+        <td>{{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[(p.position - 1) % 26] }}</td>
+        <td>{{ p.title }}</td>
+        <td>{{ status_cell(pr) }}</td>
+        <td class="muted">{{ p.time_limit_sec }} s · {{ p.mem_limit_mb }} MB</td>
+        <td><a class="btn" href="{{ url_for('problem', pid=p.id) }}">Open</a></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="muted">No problems have been added yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="muted">Each problem can be solved once. Resubmitting identical code is not allowed.{% if limit %} Limit: {{ limit }} attempts per problem.{% endif %}</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %} · {{ nav_title }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body data-contest='{{ status|default({'status': 'not_configured'})|tojson }}' data-page="{% block page %}{% endblock %}" data-user="{{ g.user.id if g.user else '' }}" data-reload="{% block reload %}0{% endblock %}">
+<header class="topbar">
+  <a class="brand" href="{{ url_for('index') }}">{{ nav_title }}</a>
+  {% if g.user %}
+    <nav>
+      {% if g.user.is_admin %}
+        <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('admin_contests') }}">Contests</a>
+        <a href="{{ url_for('admin_users') }}">Participants</a>
+        <a href="{{ url_for('admin_problems') }}">Problems</a>
+        <a href="{{ url_for('admin_sessions') }}">Sessions</a>
+        <a href="{{ url_for('admin_security') }}">Security</a>
+      {% else %}
+        <a href="{{ url_for('problems') }}">Problems</a>
+        <a href="{{ url_for('my_submissions') }}">My submissions</a>
+        <a href="{{ url_for('leaderboard') }}">Leaderboard</a>
+      {% endif %}
+    </nav>
+    <div class="who">
+      <span>{{ g.user.full_name or g.user.username }}</span>
+      <form method="post" action="{{ url_for('logout') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}"><button class="ghost">Log out</button></form>
+    </div>
+  {% endif %}
+</header>
+
+<main class="wrap">
+  {% for category, msg in get_flashed_messages(with_categories=true) %}
+    <div class="flash {{ category }}">{{ msg }}</div>
+  {% endfor %}
+  <div id="notice" class="flash info" hidden></div>
+  {% block content %}{% endblock %}
+</main>
+
+{% if g.user %}
+<script src="{{ url_for('static', filename='socket.io.min.js') }}"></script>
+<script src="{{ url_for('static', filename='contest.js') }}"></script>
+{% endif %}
+{% block scripts %}{% endblock %}
+</body>
+</html>

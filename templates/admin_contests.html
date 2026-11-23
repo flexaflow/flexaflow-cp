@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Contests{% endblock %}
+{% block page %}admin-contests{% endblock %}
+{% block content %}
+<h1>Contests</h1>
+<p class="muted">
+  One contest is active at a time. To start a new one, end the current contest and archive it first.
+  Archived contests keep their problems, participants, submissions and leaderboard for review and export.
+</p>
+
+<section class="card">
+  <h2>Start a new contest</h2>
+  {% if active %}
+    <p class="muted">A contest is active: <b>{{ active.title }}</b>. End and archive it before starting another.</p>
+    <a class="btn" href="{{ url_for('admin_dashboard') }}">Open the active contest</a>
+  {% else %}
+  <form method="post" action="{{ url_for('admin_new_contest') }}" class="grid3"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <label>Title <input name="title" required placeholder="e.g. Lab Contest 3"></label>
+    <label>Start <input name="start" type="datetime-local" required></label>
+    <label>End <input name="end" type="datetime-local" required></label>
+    <label>Max attempts per problem <input name="max_attempts" type="number" min="0" max="1000" value="30"></label>
+    <div class="span3"><button class="primary">Create contest</button>
+      <span class="muted">After creating it, import its problems and add its participants.</span></div>
+  </form>
+  {% endif %}
+</section>
+
+<table class="table">
+  <thead><tr><th>Contest</th><th>Status</th><th>Start</th><th>End</th><th>Problems</th><th>Participants</th><th>Submissions</th><th></th></tr></thead>
+  <tbody>
+  {% for c in contests %}
+    <tr>
+      <td>{{ c.title }}</td>
+      <td><span class="pill">{{ c.status }}</span></td>
+      <td>{{ (c.start_at or '')[:16]|replace('T', ' ') }}</td>
+      <td>{{ (c.end_at or '')[:16]|replace('T', ' ') }}</td>
+      <td>{{ c.problems }}</td>
+      <td>{{ c.participants }}</td>
+      <td>{{ c.submissions }}</td>
+      <td><a class="btn" href="{{ url_for('admin_contest_detail', cid=c.id) }}">Open</a></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="muted">No contests yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

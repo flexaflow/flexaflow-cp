@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Security{% endblock %}
+{% block page %}admin-security{% endblock %}
+{% block content %}
+<h1>Admin security</h1>
+
+<section class="card">
+  <h2>Two-factor login <span class="pill">{{ 'on' if enabled else 'off' }}</span></h2>
+  <p class="muted">
+    When on, your password is not enough: you also enter a 6-digit code from an authenticator app
+    (Google Authenticator, Microsoft Authenticator, Authy, or similar). Each code can be used once.
+  </p>
+
+  {% if enabled %}
+    <form method="post" action="{{ url_for('admin_2fa_disable') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <h3>Turn off</h3>
+      <div class="row">
+        <label>Password <input name="password" type="password" required></label>
+        <label>Current code <input name="code" inputmode="numeric" required></label>
+      </div>
+      <button class="danger">Turn off two-factor login</button>
+    </form>
+
+  {% elif pending_secret %}
+    <h3>Set up your app</h3>
+    <ol>
+      <li>Open your authenticator app and add an account. Choose <b>enter a setup key</b>.</li>
+      <li>Account name: <code>admin</code>. Key (copy exactly, no spaces):</li>
+    </ol>
+    <pre class="secret">{{ pending_secret }}</pre>
+    <p class="muted">Time-based, 6 digits, 30 seconds. Keep this key private. Anyone with it can generate your codes.</p>
+    <form method="post" action="{{ url_for('admin_2fa_enable') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <label>Enter the 6-digit code the app shows now
+        <input name="code" inputmode="numeric" autocomplete="one-time-code" required></label>
+      <button class="primary">Turn on two-factor login</button>
+    </form>
+
+  {% else %}
+    <form method="post" action="{{ url_for('admin_2fa_setup') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <button class="primary">Set up two-factor login</button>
+    </form>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Lost your phone?</h2>
+  <p class="muted">The server operator can turn two-factor login off with <code>python manage.py reset_2fa &lt;username&gt;</code>, then you can set it up again.</p>
+</section>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Submission {{ s.id }}{% endblock %}
+{% block page %}admin-submission{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin_dashboard') }}">← Dashboard</a></p>
+<h1>Submission #{{ s.id }}</h1>
+<p class="muted">{{ s.username }} · {{ s.title }} · {{ languages.get(s.language, s.language) }} · {{ s.verdict }} ({{ s.passed }}/{{ s.total }}) · {{ s.submitted_at }}</p>
+{% if s.compile_output %}<pre>{{ s.compile_output }}</pre>{% endif %}
+<pre class="code-view">{{ s.code }}</pre>
+{% endblock %}

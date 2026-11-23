@@ -1,0 +1,25 @@
+{
+  "problems": [
+    {
+      "title": "A + B",
+      "statement": "Read two integers a and b (-10^9 <= a, b <= 10^9) on one line.\nPrint their sum on one line.",
+      "time_limit_sec": 2,
+      "mem_limit_mb": 256,
+      "tests": [
+        {"input": "3 4\n", "output": "7\n", "sample": true},
+        {"input": "10 20\n", "output": "30\n"},
+        {"input": "-5 5\n", "output": "0\n"}
+      ]
+    },
+    {
+      "title": "Max of Three",
+      "statement": "Read three integers on one line. Print the largest one.",
+      "time_limit_sec": 1,
+      "mem_limit_mb": 256,
+      "tests": [
+        {"input": "1 2 3\n", "output": "3\n", "sample": true},
+        {"input": "-1 -2 -3\n", "output": "-1\n"}
+      ]
+    }
+  ]
+}

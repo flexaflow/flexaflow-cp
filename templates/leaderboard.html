@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard{% endblock %}
+{% block page %}leaderboard{% endblock %}
+{% block content %}
+<h1>Live leaderboard</h1>
+<p class="muted">
+  Ranked by problems solved, then penalty (minutes to each solve + 20 per wrong try).
+  <span id="board-updated"></span>
+</p>
+<table class="table">
+  <thead><tr><th>Rank</th><th>Participant</th><th>Solved</th><th>Penalty</th></tr></thead>
+  <tbody id="board-body">
+  {% for r in rows %}
+    <tr><td>{{ r.rank }}</td>
+        <td>{{ r.username }}{% if r.full_name %} ({{ r.full_name }}){% endif %}</td>
+        <td>{{ r.solved }}</td><td>{{ r.penalty }}</td></tr>
+  {% else %}
+    <tr><td colspan="4" class="muted">No participants yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

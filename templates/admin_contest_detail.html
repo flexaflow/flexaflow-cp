@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ c.title }}{% endblock %}
+{% block page %}admin-contest{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('admin_contests') }}">← All contests</a></p>
+<h1>{{ c.title }} <span class="pill">{{ 'archived' if c.archived else c_status }}</span></h1>
+<p class="muted">
+  {{ (c.start_at or '')[:16]|replace('T', ' ') }} UTC → {{ (c.end_at or '')[:16]|replace('T', ' ') }} UTC ·
+  {{ c.max_attempts or 'unlimited' }} attempts per problem
+</p>
+
+<section class="card">
+  <h2>Actions</h2>
+  <div class="actions-row">
+    {% if c_status == 'running' %}
+      <form method="post" action="{{ url_for('admin_end_contest', cid=c.id) }}" data-confirm="End this contest now? Submissions will close immediately."><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <button class="danger">End contest now</button></form>
+    {% endif %}
+    {% if c_status == 'ended' and not c.archived %}
+      <form method="post" action="{{ url_for('admin_archive_contest', cid=c.id) }}" data-confirm="Archive this contest? Participants will be signed out. Export first if you need the data."><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <button class="primary">Archive contest</button></form>
+    {% endif %}
+    <a class="btn" href="{{ url_for('admin_export_contest', cid=c.id) }}">Export (ZIP)</a>
+  </div>
+  <p class="muted">The export includes the problemset JSON, the leaderboard, the participant list, every submission as CSV, and the source code of each submission.</p>
+</section>
+
+<section class="card">
+  <h2>Leaderboard</h2>
+  <table class="table">
+    <thead><tr><th>Rank</th><th>Participant</th><th>Solved</th><th>Penalty</th></tr></thead>
+    <tbody>
+    {% for r in board %}
+      <tr><td>{{ r.rank }}</td><td>{{ r.username }}{% if r.full_name %} ({{ r.full_name }}){% endif %}</td><td>{{ r.solved }}</td><td>{{ r.penalty }}</td></tr>
+    {% else %}
+      <tr><td colspan="4" class="muted">No accepted submissions.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="card">
+  <h2>Problems ({{ problems|length }})</h2>
+  <ul>{% for p in problems %}<li>{{ 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[(p.position - 1) % 26] }}. {{ p.title }} <span class="muted">({{ p.tests }} tests)</span></li>{% else %}<li class="muted">None.</li>{% endfor %}</ul>
+</section>
+
+<section class="card">
+  <h2>Submissions (latest 300)</h2>
+  <table class="table">
+    <thead><tr><th>#</th><th>User</th><th>Problem</th><th>Lang</th><th>Verdict</th><th>Time (UTC)</th></tr></thead>
+    <tbody>
+    {% for s in subs %}
+      <tr><td><a href="{{ url_for('admin_submission', sid=s.id) }}">{{ s.id }}</a></td><td>{{ s.username }}</td><td>{{ s.title }}</td><td>{{ s.language }}</td><td>{{ s.verdict }}</td><td>{{ s.submitted_at[11:19] }}</td></tr>
+    {% else %}
+      <tr><td colspan="6" class="muted">No submissions.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

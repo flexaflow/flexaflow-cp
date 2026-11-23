@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block page %}admin-users{% endblock %}
+{% block content %}
+<h1>Participants</h1>
+
+{% if errors %}
+  {% for e in errors %}<div class="flash error">{{ e }}</div>{% endfor %}
+{% endif %}
+
+{% if created %}
+<section class="card">
+  <h2>Accounts created: {{ created|length }}</h2>
+  <p class="muted">Passwords are shown only now. Copy or print them before leaving this page.</p>
+  <table class="table">
+    <thead><tr><th>Username</th><th>Password</th></tr></thead>
+    <tbody>{% for u, pw in created %}<tr><td><code>{{ u }}</code></td><td><code>{{ pw }}</code></td></tr>{% endfor %}</tbody>
+  </table>
+</section>
+{% endif %}
+
+<div class="grid2">
+  <section class="card">
+    <h2>Add one participant</h2>
+    <form method="post" action="{{ url_for('admin_add_user') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <label>Username <input name="username" required pattern="[A-Za-z0-9_.-]{3,32}"></label>
+      <label>Full name <input name="full_name"></label>
+      <label>Password <input name="password" placeholder="leave empty to generate"></label>
+      <button class="primary">Create</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Bulk create</h2>
+    <p class="muted">One per line: <code>username,full name,password</code>. Password is optional; lines starting with # are ignored.</p>
+    <form method="post" action="{{ url_for('admin_bulk_users') }}"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <textarea name="lines" rows="6" class="code" placeholder="alice01,Alice Rahman,secret123&#10;bob02,Bob Khan"></textarea>
+      <button class="primary">Create all</button>
+    </form>
+  </section>
+</div>
+
+<section class="card">
+  <h2>All participants ({{ users|length }})</h2>
+  <table class="table">
+    <thead><tr><th>Username</th><th>Name</th><th>Logged in</th><th>Submissions</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for u in users %}
+      <tr>
+        <td><code>{{ u.username }}</code></td>
+        <td>{{ u.full_name or '' }}</td>
+        <td>{{ 'yes' if u.online else 'no' }}</td>
+        <td>{{ u.subs }}</td>
+        <td class="actions">
+          <form method="post" action="{{ url_for('admin_reset_password', uid=u.id) }}" class="inline"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+            <input name="password" placeholder="new password (optional)" size="14">
+            <button>Reset</button>
+          </form>
+          <form method="post" action="{{ url_for('admin_delete_user', uid=u.id) }}" class="inline"
+                data-confirm="Delete {{ u.username }} and all their submissions?"><input type="hidden" name="csrf" value="{{ csrf_token() }}">
+            <button class="danger">Delete</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="muted">No participants yet. Add them above.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

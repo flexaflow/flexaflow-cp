@@ -1,0 +1,8 @@
+.env
+judge.db
+judge.db-*
+venv/
+**/__pycache__/
+*.pyc
+.git/
+tests/
